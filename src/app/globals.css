@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode */
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 10% 15%; /* Dark Grey/Black Text */
+
+    --card: 0 0% 97%; /* Very Light Grey */
+    --card-foreground: 220 10% 15%;
+
+    --popover: 0 0% 97%;
+    --popover-foreground: 220 10% 15%;
+
+    --primary: 145 58% 35%; /* Green - Darkened */
+    --primary-foreground: 0 0% 100%; /* White text on Green */
+
+    --secondary: 0 0% 94%; /* Light Grey */
+    --secondary-foreground: 220 10% 20%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 220 5% 50%; /* Mid Grey Text */
+
+    --accent: 145 58% 35%; /* Green - Darkened */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 88%; /* Subtle Border */
+    --input: 0 0% 92%; /* Input Background */
+    --ring: 145 58% 40%; /* Green for focus rings - Darkened */
+
+    --radius: 0.5rem;
+
+    /* Chart colors (can be adjusted or expanded) */
+    --chart-1: 145 58% 35%; /* Green - Darkened */
+    --chart-2: 145 58% 55%; /* Lighter Green - Adjusted */
+    --chart-3: 210 50% 60%; /* Muted Blue */
+    --chart-4: 30 80% 60%; /* Orange */
+    --chart-5: 260 50% 65%; /* Purple */
+
+    /* Sidebar specific colors - Light Theme */
+    --sidebar-background: 0 0% 96%; /* Light grey, slightly darker than main bg */
+    --sidebar-foreground: 220 10% 20%; /* Darker text */
+    --sidebar-primary: 145 58% 30%; /* Darker Green for active items - Darkened */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 145 30% 90%; /* Very light green for hover */
+    --sidebar-accent-foreground: 145 58% 25%; /* Darker green text on hover */
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 145 58% 40%; /* Darkened */
+  }
+
+  .dark {
+    /* Dark Mode */
+    --background: 220 10% 7%; /* Very Dark Desaturated Blue/Grey */
+    --foreground: 210 20% 95%; /* Very Light Grey Text */
+
+    --card: 220 10% 12%; /* Slightly Lighter Dark Grey for Cards */
+    --card-foreground: 210 20% 95%;
+
+    --popover: 220 10% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 145 58% 40%; /* Green - Darkened */
+    --primary-foreground: 0 0% 100%; /* White text on Green */
+
+    --secondary: 220 10% 15%; /* Darker Grey for secondary elements */
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 220 10% 15%;
+    --muted-foreground: 210 15% 60%; /* Mid Grey Text */
+
+    --accent: 145 58% 40%; /* Green as accent - Darkened */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%; /* Adjusted destructive for dark */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 10% 20%; /* Subtle Border */
+    --input: 220 10% 18%; /* Input Background */
+    --ring: 145 58% 45%; /* Green for focus rings - Darkened */
+    
+    /* Chart colors for dark theme */
+    --chart-1: 145 58% 45%; /* Darkened */
+    --chart-2: 145 58% 65%; /* Adjusted */
+    --chart-3: 210 50% 70%;
+    --chart-4: 30 80% 70%;
+    --chart-5: 260 50% 75%;
+
+    /* Sidebar specific colors - Dark Theme */
+    --sidebar-background: 220 10% 9%; /* Darker than main dark bg */
+    --sidebar-foreground: 210 20% 90%; /* Light text */
+    --sidebar-primary: 145 58% 45%; /* Brighter Green for active items - Darkened */
+    --sidebar-primary-foreground: 0 0% 5%; /* Very dark text on green */
+    --sidebar-accent: 145 40% 20%; /* Muted dark green for hover */
+    --sidebar-accent-foreground: 145 50% 80%; /* Lighter green text on hover */
+    --sidebar-border: 220 10% 18%;
+    --sidebar-ring: 145 58% 45%; /* Darkened */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), sans-serif;
+  }
+}
+
+@layer utilities {
+  .textarea-animated-focus {
+    position: relative; /* Needed for the absolute pseudo-element */
+  }
+
+  .textarea-animated-focus:focus-visible {
+    outline: none; /* Remove default browser outline */
+    border-color: transparent !important; /* Make original border transparent to show pseudo-element */
+  }
+
+  .textarea-animated-focus::after {
+    content: '';
+    position: absolute;
+    top: -2px; /* Thickness of the outline */
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    /* Match textarea's rounded-md which is calc(var(--radius) - 2px) */
+    border-radius: calc(var(--radius) - 2px); 
+    background: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--ring)), hsl(var(--primary)));
+    background-size: 200% 200%; /* Make gradient larger for animation */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* So it doesn't interfere with textarea interaction */
+    z-index: -1; /* Place it behind the textarea */
+  }
+
+  .textarea-animated-focus:focus-visible::after {
+    opacity: 1;
+    animation: animated-gradient-border-flow 3s ease-in-out infinite;
+  }
+
+  @keyframes animated-gradient-border-flow {
+    0% { background-position: 0% center; }
+    50% { background-position: 200% center; }
+    100% { background-position: 0% center; }
+  }
+}
+
+    
