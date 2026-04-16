@@ -2,13 +2,13 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Sparkles, User, Send, Loader2, MessageSquarePlus, Brain, Zap } from 'lucide-react';
-import { getAICoachTipsAction, HabitCoachTipsInput } from '@/app/(main)/actions'; // Import HabitCoachTipsInput
+import { Sparkles, User, Send, Loader2 } from 'lucide-react';
+import { getAICoachTipsAction } from '@/app/(main)/actions';
+import type { HabitCoachTipsInput } from '@/ai/flows/habit-coach-tips';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/use-auth';
@@ -20,10 +20,10 @@ interface Message {
   content: string;
 }
 
-const examplePrompts = [
-  { title: "Beat Procrastination", description: "Give me tips to stop procrastinating on my coding projects.", icon: Zap },
-  { title: "Build a Reading Habit", description: "How can I make reading a daily habit?", icon: MessageSquarePlus },
-  { title: "Improve Focus", description: "Suggest techniques to improve my focus while working.", icon: Brain },
+const suggestions = [
+  "How do I stop procrastinating on my projects?",
+  "Tips for building a daily reading habit",
+  "How can I improve my focus while working?",
 ];
 
 export function ChatInterface() {
@@ -48,8 +48,8 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  const handleExamplePromptClick = (promptDescription: string) => {
-    setInput(promptDescription);
+  const handleSuggestionClick = (text: string) => {
+    setInput(text);
     inputRef.current?.focus();
   };
   
@@ -59,8 +59,6 @@ export function ChatInterface() {
 
     const userMessageContent = input;
     
-    // Prepare history: all messages currently in state
-    // The AI will see these, then the currentInput.
     const conversationHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.content,
@@ -88,7 +86,7 @@ export function ChatInterface() {
         description: "Could not get tips from AI coach. Please try again.",
         variant: "destructive",
       });
-      const errorMessageContent = "Sorry, I couldn't process your request right now. Please ensure your previous messages and current input are not too long, or try simplifying your query.";
+      const errorMessageContent = "Sorry, I couldn't process your request right now. Please try again or simplify your query.";
       const errorMessage: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: errorMessageContent };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -98,42 +96,36 @@ export function ChatInterface() {
     }
   };
 
-  const userName = user?.displayName?.split(' ')[0] || 'Explorer';
-
   return (
-    <div className="flex flex-col h-full p-4 md:p-6 bg-background text-foreground">
+    <div className="flex flex-col h-full bg-transparent w-full relative">
       <AnimatePresence>
         {messages.length === 0 && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }} 
+            initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }} 
-            className="flex-1 flex flex-col items-center justify-center text-center"
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5, type: 'spring', bounce: 0.3 }} 
+            className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto px-4"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">Hello, {userName}</span>
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-1 ring-primary/20 shadow-[0_0_40px_-10px] shadow-primary/20">
+                <Sparkles className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-semibold text-foreground tracking-tight mb-3">
+              Ask your coach a question
             </h1>
-            <p className="text-muted-foreground mb-10 text-lg">How can I help you build better habits today?</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl mb-12">
-              {examplePrompts.map((prompt, index) => (
-                <motion.div
-                  key={prompt.title}
-                  initial={{ opacity: 0, scale: 0.95 }} 
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 * index, duration: 0.25 }} 
+            <p className="text-muted-foreground text-sm mb-10 max-w-md leading-relaxed">Get personalized, data-driven advice on habit building, maintaining brutal consistency, and structuring your life.</p>
+            <div className="grid grid-cols-1 gap-3 w-full max-w-lg">
+              {suggestions.map((text, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(text)}
+                  className="w-full text-left text-sm text-muted-foreground hover:text-foreground px-5 py-4 rounded-xl border border-border/40 bg-card/30 hover:bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-border/80 group"
                 >
-                  <Card 
-                    className="p-4 hover:bg-card/80 cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md"
-                    onClick={() => handleExamplePromptClick(prompt.description)}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <prompt.icon className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-card-foreground">{prompt.title}</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{prompt.description}</p>
-                  </Card>
-                </motion.div>
+                  <span className="flex items-center justify-between">
+                      {text}
+                      <Send className="h-3.5 w-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                  </span>
+                </button>
               ))}
             </div>
           </motion.div>
@@ -141,29 +133,29 @@ export function ChatInterface() {
       </AnimatePresence>
 
       {messages.length > 0 && (
-         <ScrollArea className="flex-1 mb-4 pr-2" ref={scrollAreaRef}>
-            <div className="space-y-6 max-w-3xl mx-auto w-full">
+         <ScrollArea className="flex-1 w-full" ref={scrollAreaRef}>
+            <div className="space-y-8 max-w-3xl mx-auto w-full px-4 pt-8 pb-32">
               <AnimatePresence initial={false}>
                 {messages.map((message) => (
                   <motion.div
                     key={message.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, type: 'spring', bounce: 0.3 }}
+                    className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : ''}`}
                   >
                     {message.role === 'assistant' && (
-                      <Avatar className="h-8 w-8 shrink-0 border-2 border-primary/50">
-                         <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
+                      <Avatar className="h-8 w-8 shrink-0 mt-0.5 ring-1 ring-border/50 shadow-sm">
+                         <AvatarFallback className="bg-primary/10 text-primary text-xs"><Sparkles className="h-4 w-4" /></AvatarFallback>
                       </Avatar>
                     )}
                     <div
-                      className={`max-w-[85%] md:max-w-[75%] ${
+                      className={`max-w-[85%] ${
                         message.role === 'user'
-                          ? 'bg-primary text-primary-foreground rounded-xl rounded-br-none p-3 text-sm shadow-md'
-                          : 'prose prose-sm dark:prose-invert max-w-none bg-card p-3 rounded-xl shadow-md' 
+                          ? 'bg-neutral-800/90 text-white rounded-2xl rounded-tr-sm px-5 py-3.5 text-[15px] leading-relaxed shadow-sm border border-white/10 backdrop-blur-md'
+                          : 'prose prose-sm dark:prose-invert prose-p:leading-relaxed prose-headings:font-semibold max-w-none px-2 pt-1' 
                       }`}
                     >
                       {message.role === 'assistant' ? (
@@ -187,8 +179,8 @@ export function ChatInterface() {
                       )}
                     </div>
                     {message.role === 'user' && (
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                      <Avatar className="h-8 w-8 shrink-0 mt-0.5 ring-1 ring-border/50">
+                        <AvatarFallback className="bg-background text-muted-foreground text-xs"><User className="h-4 w-4" /></AvatarFallback>
                       </Avatar>
                     )}
                   </motion.div>
@@ -198,16 +190,16 @@ export function ChatInterface() {
                 <motion.div
                     key="loading"
                     layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.15 }}
                     className="flex items-start gap-3"
                 >
-                  <Avatar className="h-8 w-8 shrink-0 border-2 border-primary/50">
-                     <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
+                  <Avatar className="h-8 w-8 shrink-0 mt-0.5 ring-1 ring-border/50">
+                     <AvatarFallback className="bg-primary/10 text-primary text-xs"><Sparkles className="h-4 w-4" /></AvatarFallback>
                   </Avatar>
-                  <div className="bg-card p-3 rounded-xl shadow-md">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <div className="bg-card/40 border border-border/40 rounded-2xl rounded-tl-sm px-5 py-3.5 flex flex-col justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   </div>
                 </motion.div>
               )}
@@ -215,30 +207,37 @@ export function ChatInterface() {
           </ScrollArea>
       )}
 
-      <form 
-        onSubmit={handleSubmit} 
-        className="mt-auto flex w-full items-end gap-2 bg-background pt-2 sticky bottom-0 max-w-3xl mx-auto"
-      >
-        <Textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask your AI Habit Coach..."
-          className="flex-1 resize-none min-h-[48px] rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/50 py-3 textarea-animated-focus"
-          rows={1}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          disabled={isLoading}
-        />
-        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-[48px] w-[48px] rounded-xl shadow-sm">
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          <span className="sr-only">Send</span>
-        </Button>
-      </form>
+      <div className="absolute bottom-6 left-0 right-0 px-4 w-full flex justify-center pointer-events-none">
+        <form 
+          onSubmit={handleSubmit} 
+          className="w-full max-w-2xl bg-card/70 backdrop-blur-xl border border-border/50 rounded-2xl p-2 pl-4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-end gap-3 pointer-events-auto transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/30"
+        >
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask your coach..."
+            className="flex-1 resize-none min-h-[44px] max-h-[120px] bg-transparent border-0 py-3 text-[15px] focus-visible:ring-0 shadow-none scrollbar-hide"
+            rows={1}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+            disabled={isLoading}
+          />
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={isLoading || !input.trim()} 
+            className="h-[44px] w-[44px] shrink-0 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-transform active:scale-95"
+          >
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-4 w-4 ml-0.5" />}
+            <span className="sr-only">Send</span>
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

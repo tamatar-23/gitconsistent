@@ -49,16 +49,16 @@ const getDayOfYear = (date: Date): number => {
 };
 
 const calculateIndividualDailyStreak = (
-    habit: Habit,
-    allUserLogs: HabitLog[],
-    todayDateForStreak: Date // Expects startOfDay(new Date())
+  habit: Habit,
+  allUserLogs: HabitLog[],
+  todayDateForStreak: Date // Expects startOfDay(new Date())
 ): number => {
   if (habit.frequency !== 'daily') {
     return 0;
   }
 
   const logsForThisHabit = allUserLogs.filter(
-      (log) => log.habitId === habit.id && log.completed
+    (log) => log.habitId === habit.id && log.completed
   );
   if (logsForThisHabit.length === 0) return 0;
 
@@ -80,7 +80,7 @@ const calculateIndividualDailyStreak = (
     if (completedDates.has(format(currentDateToCheck, 'yyyy-MM-dd'))) {
       streak++;
       let previousDay = subDays(currentDateToCheck, 1);
-      while(completedDates.has(format(previousDay, 'yyyy-MM-dd'))) {
+      while (completedDates.has(format(previousDay, 'yyyy-MM-dd'))) {
         streak++;
         previousDay = subDays(previousDay, 1);
       }
@@ -162,109 +162,110 @@ export function CustomSidebarContent({ user, habits, habitLogs, isLoading, today
 
   if (isLoading) {
     return (
-        <div className="flex flex-col h-full">
-          <div className="flex-grow p-2 space-y-4 overflow-hidden">
-            <div className="mb-4 group-data-[collapsible=icon]:hidden">
-              <Skeleton className="h-6 w-3/4 mb-1" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-
-            {Array.from({ length: 3 }).map((_, i) => (
-                <div key={`skeleton-habit-${i}`} className="flex items-center space-x-3 p-2 rounded-lg group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
-                  <Skeleton className="h-7 w-7 rounded group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8" />
-                  <div className="flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
-                  </div>
-                  <Skeleton className="h-9 w-9 rounded-full group-data-[collapsible=icon]:hidden" />
-                </div>
-            ))}
-            <div className="group-data-[collapsible=icon]:hidden pt-4 space-y-3 p-1">
-              <Skeleton className="bg-muted p-3 rounded-lg h-[118px] w-full">
-                <Skeleton className="h-4 w-1/3 mb-2.5 bg-background/50" />
-                <div className="flex justify-around items-end h-[calc(100%-1.625rem)]">
-                  {Array.from({length: 7}).map((_, i) => (
-                      <div key={`skeleton-chart-bar-${i}`} className="flex flex-col items-center space-y-1.5 flex-1">
-                        <Skeleton className="h-3 w-5 bg-background/30"/>
-                        <Skeleton className="h-14 max-h-full w-6 rounded-full bg-secondary" />
-                        <Skeleton className="h-3 w-5 bg-background/30"/>
-                      </div>
-                  ))}
-                </div>
-              </Skeleton>
-            </div>
+      <div className="flex flex-col h-full">
+        <div className="flex-grow p-2 space-y-4 overflow-hidden">
+          <div className="mb-4 group-data-[collapsible=icon]:hidden">
+            <Skeleton className="h-6 w-3/4 mb-1" />
+            <Skeleton className="h-4 w-1/2" />
           </div>
-          <div className="group-data-[collapsible=icon]:hidden mt-auto p-3 text-center border-t border-sidebar-border">
-            <Skeleton className="h-3 w-4/5 mx-auto mb-1" />
-            <Skeleton className="h-3 w-3/5 mx-auto" />
+
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skeleton-habit-${i}`} className="flex items-center space-x-3 p-2 rounded-lg group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
+              <Skeleton className="h-7 w-7 rounded group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8" />
+              <div className="flex-1 space-y-1 group-data-[collapsible=icon]:hidden">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+              <Skeleton className="h-9 w-9 rounded-full group-data-[collapsible=icon]:hidden" />
+            </div>
+          ))}
+          <div className="group-data-[collapsible=icon]:hidden pt-4 space-y-3 p-1">
+            <Skeleton className="bg-muted p-3 rounded-lg h-[118px] w-full">
+              <Skeleton className="h-4 w-1/3 mb-2.5 bg-background/50" />
+              <div className="flex justify-around items-end h-[calc(100%-1.625rem)]">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div key={`skeleton-chart-bar-${i}`} className="flex flex-col items-center space-y-1.5 flex-1">
+                    <Skeleton className="h-3 w-5 bg-background/30" />
+                    <Skeleton className="h-14 max-h-full w-6 rounded-full bg-secondary" />
+                    <Skeleton className="h-3 w-5 bg-background/30" />
+                  </div>
+                ))}
+              </div>
+            </Skeleton>
           </div>
         </div>
+        <div className="group-data-[collapsible=icon]:hidden mt-auto px-4 pb-6 pt-4 text-center">
+          <Skeleton className="h-2 w-4/5 mx-auto mb-2 opacity-50" />
+          <Skeleton className="h-2 w-3/5 mx-auto opacity-50" />
+        </div>
+      </div>
     );
   }
 
   return (
-      <div className="flex flex-col h-full">
-        <ScrollArea className="flex-grow">
-          <div className="p-2 space-y-1">
-            <div className="mb-3 group-data-[collapsible=icon]:hidden">
-              <h2 className="text-xl font-semibold text-foreground">Today's Flow</h2>
-              <p className="text-sm text-muted-foreground">{currentDateFormatted}</p>
-            </div>
-
-            {habits.length === 0 && !isLoading && (
-                <p className="text-sm text-muted-foreground p-2 group-data-[collapsible=icon]:hidden">No habits yet. Add some on the dashboard!</p>
-            )}
-
-            <ul className="space-y-1.5">
-              {habits.map(habit => {
-                const streak = calculateIndividualDailyStreak(habit, habitLogs, todayDate);
-                return (
-                    <HabitSidebarItem
-                        key={habit.id}
-                        habit={habit}
-                        isCompleted={isHabitCompletedToday(habit.id)}
-                        onToggle={() => handleToggleCompletion(habit.id, isHabitCompletedToday(habit.id))}
-                        isLoading={loadingHabitId === habit.id}
-                        streak={streak}
-                    />
-                );
-              })}
-            </ul>
-
-            {habits.length > 0 && (
-                <div className="group-data-[collapsible=icon]:hidden pt-4 p-1">
-                  <WeeklyProgressChart data={weeklyProgressData} />
-                </div>
-            )}
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-grow">
+        <div className="p-3 space-y-2">
+          <div className="mb-4 px-1 group-data-[collapsible=icon]:hidden flex justify-between items-end">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-80">Today</h2>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-40">{currentDateFormatted}</p>
           </div>
-        </ScrollArea>
 
-        <div className="px-2 py-2 border-t border-sidebar-border group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-1 group-data-[collapsible=icon]:border-t-0">
-          <Link href="/archive" passHref legacyBehavior>
-            <Button
-                variant="ghost"
-                className={cn(
-                    "w-full justify-start text-sm font-medium transition-colors h-9 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-                    pathname === '/archive'
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
-                )}
-                title="Archived Habits"
-            >
-              <Archive className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
-              <span className="ml-3 group-data-[collapsible=icon]:hidden">Archived</span>
-            </Button>
-          </Link>
-        </div>
+          {habits.length === 0 && !isLoading && (
+            <p className="text-xs text-muted-foreground px-1 group-data-[collapsible=icon]:hidden">No habits yet. Add some on the dashboard!</p>
+          )}
 
-        {dailyQuote && (
-            <div className="group-data-[collapsible=icon]:hidden p-3 text-center border-t border-sidebar-border">
-              <p className="text-xs italic text-muted-foreground">
-                &ldquo;{dailyQuote}&rdquo;
-              </p>
+          <ul className="space-y-1.5">
+            {habits.map(habit => {
+              const streak = calculateIndividualDailyStreak(habit, habitLogs, todayDate);
+              return (
+                <HabitSidebarItem
+                  key={habit.id}
+                  habit={habit}
+                  isCompleted={isHabitCompletedToday(habit.id)}
+                  onToggle={() => handleToggleCompletion(habit.id, isHabitCompletedToday(habit.id))}
+                  isLoading={loadingHabitId === habit.id}
+                  streak={streak}
+                />
+              );
+            })}
+          </ul>
+
+          {habits.length > 0 && (
+            <div className="group-data-[collapsible=icon]:hidden pt-6 px-1">
+              <WeeklyProgressChart data={weeklyProgressData} />
             </div>
-        )}
+          )}
+        </div>
+      </ScrollArea>
+
+      <div className="px-3 pb-3 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:pb-1 pt-2">
+        <Link href="/archive" passHref legacyBehavior>
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-[13px] font-medium transition-colors h-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 rounded-lg",
+              pathname === '/archive'
+                ? "bg-card/40 text-foreground shadow-sm ring-1 ring-border/50"
+                : "text-muted-foreground hover:bg-card/20 hover:text-foreground"
+            )}
+            title="Archived Habits"
+          >
+            <Archive className="h-4 w-4 group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />
+            <span className="ml-3 group-data-[collapsible=icon]:hidden tracking-wide">Archived Habits</span>
+          </Button>
+        </Link>
       </div>
+
+      {dailyQuote && (
+        <div className="group-data-[collapsible=icon]:hidden px-4 pb-6 pt-2 text-center opacity-70">
+          <p className="text-[11px] font-semibold text-muted-foreground tracking-widest mb-2 leading-relaxed">
+            &ldquo;{dailyQuote.split(" - ")[0]}&rdquo;
+          </p>
+          <p className="text-[10px] font-bold text-muted-foreground/60 tracking-widest">- {dailyQuote.split(" - ")[1]}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

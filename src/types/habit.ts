@@ -26,6 +26,8 @@ export interface ContributionDay {
   date: string; // YYYY-MM-DD
   count: number; 
   level: 0 | 1 | 2 | 3 | 4; 
+  isFuture?: boolean;
+  isTargetDay?: boolean;
 }
 
 // ViewMode might be removed or simplified if only 'year' is used globally.

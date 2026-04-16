@@ -3,7 +3,7 @@
 
 import type { Habit } from '@/types/habit';
 import { cn } from '@/lib/utils';
-import { Loader2, Check, Flame } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 
 interface HabitSidebarItemProps {
   habit: Habit;
@@ -17,29 +17,29 @@ export function HabitSidebarItem({ habit, isCompleted, streak, onToggle, isLoadi
   return (
       <li
           className={cn(
-              "flex items-center justify-between p-2.5 rounded-lg transition-colors group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
-              isCompleted ? "bg-primary/10" : "bg-card hover:bg-muted/70",
+              "flex items-center justify-between p-2.5 rounded-md transition-colors group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
+              isCompleted ? "bg-muted" : "hover:bg-muted/50",
               "group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:rounded-md"
           )}
       >
         <div className="flex items-center space-x-2.5 group-data-[collapsible=icon]:space-x-0">
           <div className={cn(
-              "flex items-center justify-center h-6 w-6 rounded-md border-2 shrink-0 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 group-data-[collapsible=icon]:border-0",
-              isCompleted ? "bg-primary border-primary group-data-[collapsible=icon]:bg-primary" : "bg-transparent border-border group-data-[collapsible=icon]:bg-muted/50"
+              "flex items-center justify-center h-5 w-5 rounded-full border shrink-0 transition-colors duration-200",
+              "group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 group-data-[collapsible=icon]:border-0",
+              isCompleted ? "bg-[var(--graph-4)] border-[var(--graph-4)] shadow-[0_0_6px_rgba(57,211,83,0.3)]" : "bg-transparent border-border/80 group-data-[collapsible=icon]:bg-muted/50"
           )}>
-            {isCompleted && <Check className="h-4 w-4 text-primary-foreground group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5" />}
+            <svg viewBox="0 0 14 14" className={cn("w-3 h-3 fill-current text-white transition-transform duration-200", isCompleted ? "scale-100 opacity-100" : "scale-50 opacity-0 group-data-[collapsible=icon]:scale-100 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:text-muted-foreground")} xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 6.1-6.1L13 3l-7.5 7.5z"/></svg>
           </div>
 
-          <div className="group-data-[collapsible=icon]:hidden flex items-center min-w-0"> {/* Added min-w-0 for flex child truncation */}
+          <div className="group-data-[collapsible=icon]:hidden flex items-center min-w-0">
             <p className={cn(
-                "font-medium text-sm truncate", // Added truncate
-                isCompleted ? "text-primary" : "text-card-foreground"
+                "font-medium text-sm truncate",
+                isCompleted ? "text-muted-foreground" : "text-foreground"
             )}>{habit.name}</p>
             {habit.frequency === 'daily' && streak > 0 && (
-                <span className="ml-2 text-xs font-normal flex items-center text-orange-500 dark:text-orange-400 shrink-0"> {/* Added shrink-0 to streak */}
-                  <Flame className="h-3.5 w-3.5 mr-0.5" />
-                  {streak}
-            </span>
+                <span className="ml-2 text-xs text-muted-foreground shrink-0">
+                  {streak}d
+                </span>
             )}
           </div>
         </div>
@@ -47,9 +47,9 @@ export function HabitSidebarItem({ habit, isCompleted, streak, onToggle, isLoadi
             onClick={onToggle}
             disabled={isLoading}
             className={cn(
-                "px-2.5 py-1 text-xs font-medium rounded-md border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shrink-0 group-data-[collapsible=icon]:hidden",
+                "px-2 py-1 text-xs font-medium rounded border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring shrink-0 group-data-[collapsible=icon]:hidden",
                 isCompleted
-                    ? "bg-muted border-border text-muted-foreground hover:bg-muted/80"
+                    ? "bg-transparent border-border text-muted-foreground hover:bg-muted"
                     : "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
                 isLoading ? "opacity-50 cursor-not-allowed" : ""
             )}
@@ -58,7 +58,7 @@ export function HabitSidebarItem({ habit, isCompleted, streak, onToggle, isLoadi
           {isLoading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
-              isCompleted ? "Undo?" : "Done?"
+              isCompleted ? "Undo" : "Done"
           )}
         </button>
       </li>

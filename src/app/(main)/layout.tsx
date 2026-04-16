@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { usePathname, useRouter } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { LayoutGrid, Sparkles, BrainCircuit, ScrollText } from 'lucide-react'; // Removed Archive
+import { LayoutGrid, Sparkles, BrainCircuit, ScrollText } from 'lucide-react';
 import { SettingsDropdown } from '@/components/layout/settings-dropdown'; 
 import { UserProfile } from '@/components/user-profile';
 import { Button } from '@/components/ui/button';
@@ -115,8 +115,8 @@ export default function MainAppLayout({
       variant="ghost"
       asChild
       className={cn(
-        "text-sm font-medium transition-all hover:text-primary hover:bg-primary/10", 
-        isActive ? "text-primary bg-primary/10" : "text-muted-foreground" 
+        "text-sm font-medium transition-colors hover:bg-muted hover:text-foreground", 
+        isActive ? "bg-muted text-foreground" : "text-muted-foreground" 
       )}
     >
       <Link href={href}>{children}</Link>
@@ -127,7 +127,7 @@ export default function MainAppLayout({
 
   return (
     <SidebarProvider defaultOpen>
-      <Sidebar collapsible="icon" className="border-r">
+      <Sidebar collapsible="icon" className="border-r border-border/40 !bg-card/50 !backdrop-blur-sm">
         <SidebarHeader>
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-lg text-primary">
                 <GitConsistentLogo className="h-7 w-7 text-primary" />
@@ -155,7 +155,7 @@ export default function MainAppLayout({
               <LayoutGrid className="mr-2 h-5 w-5" /> Dashboard
             </NavButton>
             <NavButton href="/coach" isActive={pathname === '/coach'}>
-              <Sparkles className="mr-2 h-5 w-5" /> AI Coach
+              <Sparkles className="mr-2 h-5 w-5" /> Coach
             </NavButton>
             <NavButton href="/insights" isActive={pathname === '/insights'}>
               <BrainCircuit className="mr-2 h-5 w-5" /> Insights

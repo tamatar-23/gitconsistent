@@ -1,15 +1,7 @@
-
 "use client";
 
-import type { Habit } from "@/types/habit";
+import type { Habit, HabitLog } from "@/types/habit";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
 import { Trash2, MoreVertical, Repeat, Square, CheckSquare, Loader2, Archive as ArchiveIcon, Pencil } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -35,10 +27,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle as FormDialogTitle } from '@/components/ui/dialog';
 import { HabitForm } from './habit-form';
+import { format, subDays, parseISO } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface HabitListItemProps {
     habit: Habit;
-    children: React.ReactNode;
+    logs: HabitLog[];
     isCompletedToday: boolean;
     todayGlobal: string;
     currentDateAnchor: Date;
@@ -49,9 +44,10 @@ const daysOfWeekMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function HabitListItem({
                                   habit,
-                                  children,
+                                  logs,
                                   isCompletedToday,
                                   todayGlobal,
+                                  currentDateAnchor,
                                   onHabitUpdated
                               }: HabitListItemProps): JSX.Element {
     const { user } = useAuth();
@@ -65,7 +61,6 @@ export function HabitListItem({
     const isToggleButtonDisabled = useMemo(() => {
         return loadingAction === 'toggle';
     }, [loadingAction]);
-
 
     const handleToggleCompletion = async () => {
         if (!user || !user.uid) {
@@ -131,117 +126,147 @@ export function HabitListItem({
         return 'Weekly';
     };
 
+    // Calculate last 7 days history
+    const last7Days = useMemo(() => {
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = subDays(currentDateAnchor, i);
+            const dateStr = format(date, 'yyyy-MM-dd');
+            const isCompleted = logs.some(log => log.date === dateStr && log.completed);
+            days.push({ date, dateStr, isCompleted });
+        }
+        return days;
+    }, [currentDateAnchor, logs]);
+
     return (
-        // Set a fixed width for the card to accommodate the full graph. 800px ~ 50rem
-        <Card className="w-[800px] h-[250px] flex flex-col transition-shadow duration-200 ease-in-out hover:shadow-xl">
-            <CardHeader className="pb-3 pt-4 px-4">
-                <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                        <CardTitle className="font-headline text-base sm:text-lg line-clamp-1">
+        <div className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/30">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+                <button
+                    onClick={handleToggleCompletion}
+                    disabled={isToggleButtonDisabled}
+                    className={cn(
+                        "flex-shrink-0 w-[22px] h-[22px] rounded-full border-[1.5px] flex items-center justify-center transition-all duration-200 ease-in-out",
+                        isCompletedToday 
+                            ? "bg-[var(--graph-4)] border-[var(--graph-4)] text-background shadow-[0_0_8px_rgba(57,211,83,0.3)]" 
+                            : "border-muted-foreground/40 hover:border-[var(--graph-4)]/60 bg-transparent text-transparent",
+                        isToggleButtonDisabled && "opacity-50 cursor-not-allowed"
+                    )}
+                >
+                    {loadingAction === 'toggle' ? (
+                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    ) : (
+                        <svg viewBox="0 0 14 14" className={cn("w-3.5 h-3.5 fill-current outline-none transition-transform duration-200", isCompletedToday ? "scale-100 opacity-100" : "scale-50 opacity-0")} xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 6.1-6.1L13 3l-7.5 7.5z"/></svg>
+                    )}
+                </button>
+
+                <div className="flex flex-col flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <h3 className={cn("font-medium text-[15px] truncate transition-colors", isCompletedToday ? "text-foreground" : "text-foreground/90")}>
                             {habit.name}
-                        </CardTitle>
-                        {habit.description && (
-                            <CardDescription className="text-xs text-muted-foreground pt-0.5 line-clamp-2 h-[2.1em]">
-                                {habit.description}
-                            </CardDescription>
-                        )}
-                        <div className="text-xs text-muted-foreground flex items-center pt-1">
-                            <Repeat className="mr-1.5 h-3.5 w-3.5" />
-                            <span>{getFrequencyText()}</span>
-                        </div>
+                        </h3>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                            variant={isCompletedToday ? "default" : "outline"}
-                            onClick={handleToggleCompletion}
-                            disabled={isToggleButtonDisabled}
-                            size="sm"
-                            className="shrink-0 h-8 px-2.5"
-                        >
-                            {loadingAction === 'toggle' ? (
-                                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                            ) : isCompletedToday ? (
-                                <CheckSquare className="mr-1.5 h-4 w-4" />
-                            ) : (
-                                <Square className="mr-1.5 h-4 w-4" />
-                            )}
-                            {isCompletedToday ? "Done" : "Mark"}
+                    {habit.description ? (
+                        <p className="text-[13px] text-muted-foreground line-clamp-1 mt-0.5">
+                            {habit.description}
+                        </p>
+                    ) : (
+                        <p className="text-[12px] text-muted-foreground/70 mt-0.5 flex items-center">
+                            <Repeat className="mr-1.5 h-[10px] w-[10px]" />
+                            {getFrequencyText()}
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex items-center gap-5 flex-shrink-0">
+                {/* Mini Tracker */}
+                <div className="flex items-center gap-1.5">
+                    {last7Days.map((day) => (
+                        <TooltipProvider key={day.dateStr} delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                  className={cn(
+                                      "h-[10px] w-[10px] rounded-[2px] transition-colors",
+                                      day.isCompleted ? "bg-[var(--graph-4)]" : "bg-muted-foreground/15"
+                                  )}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-popover text-foreground p-2 rounded-md shadow-sm border text-xs">
+                              {format(day.date, 'MMM d, yyyy')}: {day.isCompleted ? 'Completed' : 'Missed'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                    ))}
+                </div>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground/50 hover:text-foreground opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity focus:opacity-100" disabled={!!loadingAction}>
+                            <MoreVertical className="h-4 w-4" />
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" disabled={!!loadingAction}>
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={!!loadingAction}>
-                                    <Pencil className="mr-2 h-4 w-4" /> Edit Habit
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)} disabled={!!loadingAction}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit Habit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <AlertDialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!!loadingAction}>
+                                    <ArchiveIcon className="mr-2 h-4 w-4" /> Archive
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <AlertDialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
-                                    <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={!!loadingAction}>
-                                            <ArchiveIcon className="mr-2 h-4 w-4" /> Archive
-                                        </DropdownMenuItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Archive Habit?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Archiving this habit will remove it from your active list, but its history will be saved.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel disabled={loadingAction === 'archive'}>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleArchive} className="bg-amber-600 hover:bg-amber-700" disabled={loadingAction === 'archive'}>
-                                                {loadingAction === 'archive' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                                Archive
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                                    <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem
-                                            onSelect={(e) => e.preventDefault()}
-                                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                                            disabled={!!loadingAction}
-                                        >
-                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                        </DropdownMenuItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Delete Habit?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. This will permanently delete the habit and all its associated logs.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel disabled={loadingAction === 'delete'}>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={loadingAction === 'delete'}>
-                                                {loadingAction === 'delete' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                                Delete
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </div>
-            </CardHeader>
-            {/* Ensure CardContent allows graph to take its necessary width. overflow-visible might be implicit if card is wide enough. */}
-            <CardContent className="px-2 pb-2 pt-1 flex-grow overflow-visible">
-                <div className="h-[150px] w-full">
-                    {children}
-                </div>
-            </CardContent>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Archive Habit?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Archiving this habit will remove it from your active list, but its history will be saved.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel disabled={loadingAction === 'archive'}>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleArchive} disabled={loadingAction === 'archive'}>
+                                        {loadingAction === 'archive' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                        Archive
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                    disabled={!!loadingAction}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Habit?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the habit and all its associated logs.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel disabled={loadingAction === 'delete'}>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={loadingAction === 'delete'}>
+                                        {loadingAction === 'delete' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent className="sm:max-w-[525px]">
                     <DialogHeader>
-                        <FormDialogTitle className="font-headline">Edit Habit</FormDialogTitle>
+                        <FormDialogTitle>Edit Habit</FormDialogTitle>
                     </DialogHeader>
                     <HabitForm
                         initialData={habit}
@@ -253,6 +278,6 @@ export function HabitListItem({
                     />
                 </DialogContent>
             </Dialog>
-        </Card>
+        </div>
     );
 }
