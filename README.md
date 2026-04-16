@@ -15,8 +15,6 @@ Track your habits with the same visual language you use to track your code. GitH
 
 [Live Demo](https://gitconsistent.vercel.app/) · [Report Bug](https://github.com/tamatar-23/gitconsistent/issues) · [Request Feature](https://github.com/tamatar-23/gitconsistent/issues)
 
-![GitConsistent Dashboard](https://gitconsistent.vercel.app/og-preview.png)
-
 </div>
 
 ---
