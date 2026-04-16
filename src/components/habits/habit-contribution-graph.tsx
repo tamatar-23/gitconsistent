@@ -183,13 +183,17 @@ export function HabitContributionGraph({
     const dayCounts = new Array(7).fill(0);
     const monthCounts = new Array(12).fill(0);
     let pastDays = 0;
+    let firstActiveIndex = -1;
 
-    days.forEach(d => {
-      total += d.count;
+    days.forEach((d, i) => {
       const isPlaceholder = d.date === '' || d.date.startsWith('ph-');
-      if (!d.isFuture && !isPlaceholder) {
+      const isPastOrToday = !d.isFuture && !isPlaceholder;
+
+      if (isPastOrToday) {
+        total += d.count;
         pastDays++;
         if (d.count > 0) {
+          if (firstActiveIndex === -1) firstActiveIndex = i;
           const dateObj = parseISO(d.date);
           dayCounts[dateObj.getDay()] += d.count;
           monthCounts[dateObj.getMonth()] += d.count;
@@ -197,7 +201,13 @@ export function HabitContributionGraph({
       }
     });
 
-    const avg = pastDays > 0 ? (total / pastDays).toFixed(1) : "0.0";
+    // Calculate effective days since the first completion in this period
+    // This avoids "diluting" the average for newly started habits
+    const effectiveDays = firstActiveIndex !== -1 
+      ? days.slice(firstActiveIndex).filter(d => !d.isFuture && d.date !== '' && !d.date.startsWith('ph-')).length 
+      : 0;
+
+    const avg = effectiveDays > 0 ? (total / effectiveDays).toFixed(1) : "0.0";
 
     let bestDayIdx = 0;
     let maxDayCount = 0;
@@ -313,7 +323,7 @@ export function HabitContributionGraph({
           </div>
         </div>
 
-        <div className="w-full xl:w-[350px] shrink-0 flex flex-col justify-center border-t xl:border-t-0 xl:border-l border-border/40 pt-6 xl:pt-0 xl:pl-12">
+        <div className="w-full xl:w-[340px] shrink-0 flex flex-col justify-center border-t xl:border-t-0 xl:border-l border-border/40 pt-6 xl:pt-0 xl:pl-12">
           <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-6 opacity-80">Year in Review</h3>
           <div className="grid grid-cols-2 gap-y-8 gap-x-6">
             <div className="flex flex-col">
