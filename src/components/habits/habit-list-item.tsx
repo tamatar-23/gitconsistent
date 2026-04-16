@@ -43,13 +43,13 @@ interface HabitListItemProps {
 const daysOfWeekMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function HabitListItem({
-                                  habit,
-                                  logs,
-                                  isCompletedToday,
-                                  todayGlobal,
-                                  currentDateAnchor,
-                                  onHabitUpdated
-                              }: HabitListItemProps): JSX.Element {
+    habit,
+    logs,
+    isCompletedToday,
+    todayGlobal,
+    currentDateAnchor,
+    onHabitUpdated
+}: HabitListItemProps): JSX.Element {
     const { user } = useAuth();
     const { toast } = useToast();
 
@@ -121,7 +121,7 @@ export function HabitListItem({
         if (habit.frequency === 'weekly' && habit.targetDays && habit.targetDays.length > 0) {
             if (habit.targetDays.length === 7) return 'Daily (Weekly Target)';
             if (habit.targetDays.length === 0) return 'Weekly (No specific days)';
-            return habit.targetDays.sort((a,b)=>a-b).map(dayIndex => daysOfWeekMap[dayIndex]).join(', ');
+            return habit.targetDays.sort((a, b) => a - b).map(dayIndex => daysOfWeekMap[dayIndex]).join(', ');
         }
         return 'Weekly';
     };
@@ -146,8 +146,8 @@ export function HabitListItem({
                     disabled={isToggleButtonDisabled}
                     className={cn(
                         "flex-shrink-0 w-[22px] h-[22px] rounded-full border-[1.5px] flex items-center justify-center transition-all duration-200 ease-in-out",
-                        isCompletedToday 
-                            ? "bg-[var(--graph-4)] border-[var(--graph-4)] text-background shadow-[0_0_8px_rgba(57,211,83,0.3)]" 
+                        isCompletedToday
+                            ? "bg-[var(--graph-4)] border-[var(--graph-4)] text-background shadow-[0_0_8px_rgba(57,211,83,0.3)]"
                             : "border-muted-foreground/40 hover:border-[var(--graph-4)]/60 bg-transparent text-transparent",
                         isToggleButtonDisabled && "opacity-50 cursor-not-allowed"
                     )}
@@ -155,7 +155,7 @@ export function HabitListItem({
                     {loadingAction === 'toggle' ? (
                         <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                     ) : (
-                        <svg viewBox="0 0 14 14" className={cn("w-3.5 h-3.5 fill-current outline-none transition-transform duration-200", isCompletedToday ? "scale-100 opacity-100" : "scale-50 opacity-0")} xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 6.1-6.1L13 3l-7.5 7.5z"/></svg>
+                        <svg viewBox="0 0 14 14" className={cn("w-3.5 h-3.5 fill-current outline-none transition-transform duration-200", isCompletedToday ? "scale-100 opacity-100" : "scale-50 opacity-0")} xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 6.1-6.1L13 3l-7.5 7.5z" /></svg>
                     )}
                 </button>
 
@@ -183,19 +183,19 @@ export function HabitListItem({
                 <div className="flex items-center gap-1.5">
                     {last7Days.map((day) => (
                         <TooltipProvider key={day.dateStr} delayDuration={100}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                  className={cn(
-                                      "h-[10px] w-[10px] rounded-[2px] transition-colors",
-                                      day.isCompleted ? "bg-[var(--graph-4)]" : "bg-muted-foreground/15"
-                                  )}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent className="bg-popover text-foreground p-2 rounded-md shadow-sm border text-xs">
-                              {format(day.date, 'MMM d, yyyy')}: {day.isCompleted ? 'Completed' : 'Missed'}
-                            </TooltipContent>
-                          </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div
+                                        className={cn(
+                                            "h-[18px] w-[18px] rounded-[2px] transition-colors",
+                                            day.isCompleted ? "bg-[var(--graph-4)]" : "bg-muted-foreground/15"
+                                        )}
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-popover text-foreground p-2 rounded-md shadow-sm border text-xs">
+                                    {format(day.date, 'MMM d, yyyy')}: {day.isCompleted ? 'Completed' : 'Missed'}
+                                </TooltipContent>
+                            </Tooltip>
                         </TooltipProvider>
                     ))}
                 </div>
