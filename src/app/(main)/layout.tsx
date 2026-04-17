@@ -127,7 +127,7 @@ export default function MainAppLayout({
 
   return (
     <SidebarProvider defaultOpen>
-      <Sidebar collapsible="icon" className="border-r border-border/40 !bg-card/50 !backdrop-blur-sm">
+      <Sidebar collapsible="icon" className="border-r border-border">
         <SidebarHeader>
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-lg" style={{ color: '#26A641' }}>
                 <GitConsistentLogo className="h-7 w-7" style={{ color: '#26A641' }} />
@@ -148,7 +148,7 @@ export default function MainAppLayout({
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 lg:h-[60px] lg:px-6">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-border bg-background px-4 lg:h-[60px] lg:px-6">
           <SidebarTrigger className="md:hidden" />
           <nav className="flex items-center gap-2">
             <NavButton href="/dashboard" isActive={pathname === '/dashboard'}>
@@ -170,7 +170,7 @@ export default function MainAppLayout({
             {user && <UserProfile />} 
           </div>
         </header>
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-auto min-w-0">
           {children}
         </main>
       </SidebarInset>

@@ -43,75 +43,91 @@ export default function InsightsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <BrainCircuit className="h-5 w-5 text-foreground" />
-        <h1 className="text-2xl font-bold text-foreground">Insights</h1>
+    <div className="space-y-8 max-w-5xl mx-auto py-4 min-w-0 w-full">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <BrainCircuit className="h-7 w-7 text-primary" />
+            Insights
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Get personalized, AI-driven analysis of your habit patterns and achievements.
+        </p>
       </div>
 
-      <div className="border rounded-md p-5 space-y-5">
-        <div>
-          <h2 className="font-semibold text-foreground mb-1">Habit Review</h2>
-          <p className="text-sm text-muted-foreground">
-            Get personalized insights into your habit patterns and achievements.
-          </p>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as ReviewPeriod)} className="w-full sm:w-auto">
+              <TabsList className="grid w-full sm:w-[240px] grid-cols-2 bg-muted/50 p-1 rounded-full">
+                <TabsTrigger value="weekly" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm hover:text-foreground">Weekly</TabsTrigger>
+                <TabsTrigger value="monthly" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm hover:text-foreground">Monthly</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Button onClick={handleGenerateReview} disabled={isLoadingReview || !user} className="w-full sm:w-auto rounded-full font-medium shadow-sm transition-all" size="sm">
+              {isLoadingReview ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Generate Review
+            </Button>
         </div>
 
-        <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as ReviewPeriod)}>
-          <TabsList className="grid w-full grid-cols-2 md:w-[280px]">
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="min-h-[300px] bg-card rounded-2xl border border-border/80 shadow-sm p-6 sm:p-8 md:p-10 transition-all mx-auto">
+            {isLoadingReview && (
+              <div className="space-y-5 animate-pulse">
+                <Skeleton className="h-6 w-1/3 rounded-lg bg-muted" />
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-full rounded-md bg-muted/60" />
+                    <Skeleton className="h-4 w-[95%] rounded-md bg-muted/60" />
+                    <Skeleton className="h-4 w-[90%] rounded-md bg-muted/60" />
+                </div>
+                <Skeleton className="h-6 w-1/4 rounded-lg bg-muted mt-8" />
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-[92%] rounded-md bg-muted/60" />
+                    <Skeleton className="h-4 w-[88%] rounded-md bg-muted/60" />
+                </div>
+              </div>
+            )}
 
-        <Button onClick={handleGenerateReview} disabled={isLoadingReview || !user} variant="outline" size="sm">
-          {isLoadingReview ? (
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-          )}
-          Generate {selectedPeriod} review
-        </Button>
+            {reviewError && !isLoadingReview && (
+              <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-xl text-destructive flex items-start gap-3 text-sm">
+                <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-base">We couldn't generate your review</p>
+                  <p className="mt-1 opacity-90">{reviewError}</p>
+                </div>
+              </div>
+            )}
 
-        {isLoadingReview && (
-          <div className="space-y-3 pt-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        )}
+            {aiReview && !isLoadingReview && !reviewError && (
+              <div className="prose prose-slate dark:prose-invert max-w-none hover:prose-a:text-primary leading-relaxed text-[15px]">
+                 <ReactMarkdown
+                    components={{
+                        h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-8 mb-4 tracking-tight" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold mt-6 mb-3 tracking-tight" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-4 text-muted-foreground leading-7" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-6 space-y-2 text-muted-foreground" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-6 space-y-2 text-muted-foreground" {...props} />,
+                        li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold text-foreground" {...props} />,
+                    }}
+                  >
+                    {aiReview}
+                </ReactMarkdown>
+              </div>
+            )}
 
-        {reviewError && !isLoadingReview && (
-          <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive flex items-start gap-2 text-sm">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium">Error generating review</p>
-              <p className="text-xs mt-0.5">{reviewError}</p>
-            </div>
-          </div>
-        )}
-
-        {aiReview && !isLoadingReview && !reviewError && (
-          <div className="mt-2 border-t pt-4 prose prose-sm dark:prose-invert max-w-none">
-             <ReactMarkdown
-                components={{
-                    p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2" {...props} />,
-                    li: ({node, ...props}) => <li className="mb-1" {...props} />,
-                }}
-              >
-                {aiReview}
-            </ReactMarkdown>
-          </div>
-        )}
-
-        {!aiReview && !isLoadingReview && !reviewError && (
-           <div className="text-center py-8 text-muted-foreground text-sm">
-              <p>Generate a review to see your habit analysis.</p>
-          </div>
-        )}
+            {!aiReview && !isLoadingReview && !reviewError && (
+               <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground text-center animate-in fade-in duration-700">
+                  <div className="h-16 w-16 mb-6 rounded-full bg-muted/50 flex items-center justify-center">
+                    <BrainCircuit className="h-8 w-8 opacity-40" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No Insights Yet</h3>
+                  <p className="max-w-sm text-sm">Tap generate to let AI analyze your habits and provide a personalized review based on your recent activity.</p>
+              </div>
+            )}
+        </div>
       </div>
     </div>
   );

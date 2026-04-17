@@ -246,8 +246,8 @@ export function CustomSidebarContent({ user, habits, habitLogs, isLoading, today
             className={cn(
               "w-full justify-start text-[13px] font-medium transition-colors h-10 group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 rounded-lg",
               pathname === '/archive'
-                ? "bg-card/40 text-foreground shadow-sm ring-1 ring-border/50"
-                : "text-muted-foreground hover:bg-card/20 hover:text-foreground"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm ring-1 ring-border"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             )}
             title="Archived Habits"
           >

@@ -254,7 +254,7 @@ export function HabitContributionGraph({
   const graphContentMinWidth = `${(NUM_WEEKS_TO_DISPLAY * (CELL_SIZE_PX + CELL_GAP_PX)) - CELL_GAP_PX + 30 + 6}px`;
 
   return (
-    <div className="border border-border/40 rounded-xl bg-card/50 backdrop-blur-sm p-6 shadow-sm w-full">
+    <div className="border border-border rounded-xl bg-card p-6 shadow-sm w-full">
       <div className="flex flex-col xl:flex-row gap-8 lg:gap-12 w-full">
         <div className="flex-1 overflow-hidden min-w-0">
           <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6">

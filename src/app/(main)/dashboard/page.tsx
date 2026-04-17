@@ -162,7 +162,7 @@ export default function DashboardPage() {
 
     if (isLoadingPage && habits.length === 0) {
         return (
-            <div className="space-y-6 p-1 md:p-0">
+            <div className="space-y-6 p-1 md:p-0 min-w-0">
                 <div className="flex justify-between items-center">
                     <Skeleton className="h-8 w-32 rounded" />
                     <Skeleton className="h-9 w-32 rounded" />
@@ -180,7 +180,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="space-y-6 p-1 md:p-0">
+        <div className="space-y-6 p-1 md:p-0 min-w-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="flex items-baseline gap-3">
                     <h1 className="text-2xl font-bold text-foreground">Habits</h1>
@@ -228,8 +228,8 @@ export default function DashboardPage() {
                         </div>
                     )}
 
-                    <div className="bg-card/50 backdrop-blur-sm border border-border/40 rounded-xl overflow-hidden shadow-sm">
-                        <div className="divide-y divide-border/40">
+                    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                        <div className="divide-y divide-border">
                             {!isLoadingPage && habits.map((habit) => (
                                 <HabitListItem
                                     key={habit.id}

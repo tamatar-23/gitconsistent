@@ -26,7 +26,7 @@ export function HabitSidebarItem({ habit, isCompleted, streak, onToggle, isLoadi
           <div className={cn(
               "flex items-center justify-center h-5 w-5 rounded-full border shrink-0 transition-colors duration-200",
               "group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 group-data-[collapsible=icon]:border-0",
-              isCompleted ? "bg-[var(--graph-4)] border-[var(--graph-4)] shadow-[0_0_6px_rgba(57,211,83,0.3)]" : "bg-transparent border-border/80 group-data-[collapsible=icon]:bg-muted/50"
+              isCompleted ? "bg-[var(--graph-4)] border-[var(--graph-4)]" : "bg-transparent border-border group-data-[collapsible=icon]:bg-muted/50"
           )}>
             <svg viewBox="0 0 14 14" className={cn("w-3 h-3 fill-current text-white transition-transform duration-200", isCompleted ? "scale-100 opacity-100" : "scale-50 opacity-0 group-data-[collapsible=icon]:scale-100 group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:text-muted-foreground")} xmlns="http://www.w3.org/2000/svg"><path d="M5.5 10.5L2 7l1.4-1.4 2.1 2.1 6.1-6.1L13 3l-7.5 7.5z"/></svg>
           </div>

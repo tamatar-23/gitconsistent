@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, FileText, AlertTriangle, ArrowRight, CalendarDays } from 'lucide-react';
+import { Loader2, FileText, AlertTriangle, ArrowRight, CalendarDays, BrainCircuit } from 'lucide-react';
 import { analyzeJournalEntryAction, JournalAnalysisInput, JournalAnalysisOutput } from '@/app/(main)/actions';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
@@ -15,12 +15,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import type { JournalEntry } from '@/types/journal';
 import { format, parseISO } from 'date-fns';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
 
 interface GroupedEntries {
   [date: string]: JournalEntry[];
@@ -114,50 +109,61 @@ export default function JournalPage() {
   }, [groupedEntries]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <FileText className="h-5 w-5 text-foreground" />
-        <h1 className="text-2xl font-bold text-foreground">Journal</h1>
+    <div className="space-y-10 max-w-5xl mx-auto py-4 min-w-0 w-full">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <FileText className="h-7 w-7 text-primary" />
+            Journal
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Chronicle your journey. Write your thoughts and let AI provide reflection and mood analysis.
+        </p>
       </div>
 
-      <div className="border rounded-md p-5 space-y-4">
-        <div>
-          <h2 className="font-semibold text-foreground mb-1">How was your day?</h2>
-          <p className="text-sm text-muted-foreground">
-            Write about your day. The AI will provide a reflection, and your entry will be saved.
-          </p>
-        </div>
+      <div className="bg-card border border-border/60 rounded-2xl p-2 shadow-sm transition-all focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary/50 relative">
         <Textarea
           placeholder="What's on your mind today?"
           value={journalEntryText}
           onChange={(e) => setJournalEntryText(e.target.value)}
-          rows={6}
-          className="resize-none focus-visible:ring-1 focus-visible:ring-primary/40"
+          rows={5}
+          className="resize-none border-0 shadow-none focus-visible:ring-0 bg-transparent text-[15px] leading-relaxed p-4 w-full"
           disabled={isLoadingSubmission}
         />
-        <Button onClick={handleAnalyzeAndSaveJournal} disabled={isLoadingSubmission || !user || !journalEntryText.trim()} variant="outline" size="sm">
-          {isLoadingSubmission ? (
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <ArrowRight className="mr-1.5 h-3.5 w-3.5" />
-          )}
-          Analyze and save
-        </Button>
+        <div className="flex justify-between items-center px-4 pb-3 pt-2 border-t border-border/40 mt-2">
+          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest opacity-60">
+            {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+          </span>
+          <Button 
+            onClick={handleAnalyzeAndSaveJournal} 
+            disabled={isLoadingSubmission || !user || !journalEntryText.trim()} 
+            className="rounded-full shadow-sm font-medium transition-all" 
+            size="sm"
+          >
+            {isLoadingSubmission ? (
+              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <ArrowRight className="mr-2 h-3.5 w-3.5" />
+            )}
+            Save & Reflect
+          </Button>
+        </div>
       </div>
       
       {currentAiSummary && !isLoadingSubmission && !submissionError && (
-        <div className="border rounded-md p-5 space-y-4">
-          <h3 className="font-semibold text-foreground text-sm">AI Reflection</h3>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <div>
-              <h4 className="font-medium text-foreground mb-1 text-sm">Summary</h4>
-              <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />}}>
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 sm:p-8 space-y-5 animate-in slide-in-from-bottom-4 fade-in duration-500">
+          <h3 className="font-semibold text-primary text-sm flex items-center gap-2">
+            <BrainCircuit className="h-4 w-4" /> AI Reflection
+          </h3>
+          <div className="prose prose-slate dark:prose-invert max-w-none text-[15px] leading-relaxed">
+            <div className="mb-6">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Summary</h4>
+              <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-3 last:mb-0 text-foreground" {...props} />}}>
                 {currentAiSummary.daySummary}
               </ReactMarkdown>
             </div>
-            <div className="mt-3">
-              <h4 className="font-medium text-foreground mb-1 text-sm">Mood Analysis</h4>
-              <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />}}>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Mood Analysis</h4>
+              <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-0 text-foreground" {...props} />}}>
                 {currentAiSummary.moodAnalysis}
               </ReactMarkdown>
             </div>
@@ -166,86 +172,106 @@ export default function JournalPage() {
       )}
 
       {submissionError && !isLoadingSubmission && (
-        <div className="border border-destructive/20 bg-destructive/5 rounded-md p-4 flex items-start gap-2 text-sm text-destructive">
-          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-          <p>{submissionError}</p>
+        <div className="border border-destructive/20 bg-destructive/5 rounded-xl p-4 flex items-start gap-3 text-sm text-destructive">
+          <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-semibold">Unable to process entry</p>
+            <p className="opacity-90 mt-1">{submissionError}</p>
+          </div>
         </div>
       )}
 
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-lg font-semibold text-foreground">History</h2>
+      <div className="pt-6 space-y-8">
+        <div className="flex items-center gap-3 border-b border-border/40 pb-4">
+          <CalendarDays className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Timeline</h2>
         </div>
 
         {isLoadingEntries && (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={`skeleton-date-group-${i}`} className="space-y-2">
-              <Skeleton className="h-5 w-1/4 mb-2" />
-              {Array.from({ length: 2 }).map((_, j) => (
-                  <div key={`skeleton-entry-${i}-${j}`} className="border rounded-md p-3">
-                    <Skeleton className="h-4 w-1/3 mb-2" />
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-4/5 mt-1" />
-                  </div>
-              ))}
-            </div>
-          ))
+          <div className="space-y-10 animate-pulse">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={`skeleton-date-group-${i}`} className="space-y-4">
+                <Skeleton className="h-5 w-32 rounded-md bg-muted" />
+                {Array.from({ length: Math.max(1, 3 - i) }).map((_, j) => (
+                    <div key={`skeleton-entry-${i}-${j}`} className="pl-6 border-l-2 border-muted/50 space-y-3 py-2">
+                      <Skeleton className="h-3 w-20 rounded bg-muted/60" />
+                      <Skeleton className="h-4 w-[90%] rounded bg-muted" />
+                      <Skeleton className="h-4 w-[85%] rounded bg-muted" />
+                    </div>
+                ))}
+              </div>
+            ))}
+          </div>
         )}
 
         {!isLoadingEntries && sortedDates.length === 0 && (
-           <div className="text-center py-10 text-muted-foreground text-sm">
-                <p>No journal entries yet. Write your first entry above to get started.</p>
+           <div className="h-[200px] flex flex-col items-center justify-center text-muted-foreground text-center">
+                <div className="bg-muted/50 rounded-full p-4 mb-4">
+                    <FileText className="h-6 w-6 opacity-40" />
+                </div>
+                <h3 className="text-base font-medium text-foreground mb-1">Your timeline is empty</h3>
+                <p className="text-sm max-w-xs">Write your first journal entry above to start recording your thoughts.</p>
             </div>
         )}
 
         {!isLoadingEntries && sortedDates.length > 0 && (
-            sortedDates.map(dateKey => (
-              <div key={dateKey} className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {format(parseISO(dateKey), "MMMM d, yyyy")}
-                </h3>
-                <Accordion type="single" collapsible className="w-full space-y-1.5">
-                  {groupedEntries[dateKey].map((entry) => (
-                    <AccordionItem value={entry.id} key={entry.id} className="border rounded-md">
-                      <AccordionTrigger className="px-4 py-2.5 hover:no-underline text-sm">
-                        <div className="flex justify-between items-center w-full">
-                          <span className="font-medium">
-                            Entry #{entry.entrySuffix}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {entry.createdAt ? format(entry.createdAt.toDate(), 'p') : 'N/A'}
-                          </span>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-4 pb-4 pt-0">
-                        <div className="space-y-3">
-                          <div>
-                            <h4 className="font-medium text-foreground mb-1 text-xs uppercase tracking-wide text-muted-foreground">Your thoughts</h4>
-                            <ScrollArea className="max-h-40 w-full rounded border bg-muted/30 p-3 text-sm">
-                              <ReactMarkdown components={{ p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-2 last:mb-0" {...props} />}}>
-                                {entry.entryText}
-                              </ReactMarkdown>
-                            </ScrollArea>
+             <div className="space-y-12 pb-10">
+                {sortedDates.map(dateKey => (
+                  <div key={dateKey} className="space-y-6">
+                    <div className="sticky top-14 z-10 bg-background/95 backdrop-blur py-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                        {format(parseISO(dateKey), "MMMM d, yyyy")}
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {groupedEntries[dateKey].map((entry) => (
+                        <div key={entry.id} className="relative pl-6 sm:pl-10 pb-6 group">
+                          <div className="absolute left-[5px] top-3 bottom-[-16px] w-[2px] bg-muted/60 group-hover:bg-primary/40 transition-colors"></div>
+                          <div className="absolute w-3 h-3 bg-background border-2 border-muted-foreground group-hover:border-primary rounded-full left-0 top-1.5 transition-colors z-10"></div>
+                          
+                          <div className="flex flex-col gap-4">
+                            <div>
+                                <span className="text-[11px] font-bold text-muted-foreground mb-2 block tracking-wider">
+                                  {entry.createdAt ? format(entry.createdAt.toDate(), 'h:mm a') : 'N/A'}
+                                </span>
+                                <div className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap font-medium">
+                                  {entry.entryText}
+                                </div>
+                            </div>
+                            
+                            {(entry.aiDaySummary || entry.aiMoodAnalysis) && (
+                                <div className="bg-muted/30 rounded-xl p-4 sm:p-5 text-sm space-y-4">
+                                  {entry.aiDaySummary && (
+                                      <div>
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                                          <BrainCircuit className="w-3 h-3" /> Summary
+                                        </h4>
+                                        <div className="text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert">
+                                            <ReactMarkdown>{entry.aiDaySummary}</ReactMarkdown>
+                                        </div>
+                                      </div>
+                                  )}
+                                  
+                                  {entry.aiMoodAnalysis && (
+                                      <div>
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 mt-3">
+                                          Mood
+                                        </h4>
+                                        <div className="text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert">
+                                            <ReactMarkdown>{entry.aiMoodAnalysis}</ReactMarkdown>
+                                        </div>
+                                      </div>
+                                  )}
+                                </div>
+                            )}
                           </div>
-                          <hr className="border-border" />
-                          <div className="prose prose-sm dark:prose-invert max-w-none">
-                            <h4 className="font-medium text-foreground mb-1 text-xs uppercase tracking-wide text-muted-foreground">Day Summary</h4>
-                            <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />}}>
-                              {entry.aiDaySummary}
-                            </ReactMarkdown>
-                            <h4 className="font-medium text-foreground mt-3 mb-1 text-xs uppercase tracking-wide text-muted-foreground">Mood Analysis</h4>
-                            <ReactMarkdown components={{ p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />}}>
-                              {entry.aiMoodAnalysis}
-                            </ReactMarkdown>
-                          </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            ))
+                      ))}
+                    </div>
+                  </div>
+                ))}
+             </div>
         )}
       </div>
     </div>
